@@ -1,4 +1,6 @@
 // http://npcontemplation.blogspot.in/2008/06/secret-of-llvm-c-bindings.html
+// gcc `llvm-config --cflags` -c fac.c
+// g++ `llvm-config --libs --cflags --ldflags core analysis executionengine jit interpreter native` fac.o -o fac
 // Headers required by LLVM
 
 #include <llvm-c/Core.h>
@@ -55,7 +57,7 @@ int main (int argc, char const *argv[])
 	LLVMExecutionEngineRef engine;
 	LLVMModuleProviderRef provider = LLVMCreateModuleProviderForExistingModule(mod);
 	error = NULL;
-	LLVMCreateJITCompiler(&engine, provider, &error);
+	LLVMCreateJITCompiler(&engine, provider, 1, &error);
 	if(error) {
 		fprintf(stderr, "%s\n", error);
 		LLVMDisposeMessage(error);
@@ -77,7 +79,7 @@ int main (int argc, char const *argv[])
 	LLVMGenericValueRef exec_res = LLVMRunFunction(engine, fac, 1, exec_args);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "; Running fac(10) with JIT...\n");
-	fprintf(stderr, "; Result: %d\n", LLVMGenericValueToInt(exec_res, 0));
+	fprintf(stderr, "; Result: %llu\n", LLVMGenericValueToInt(exec_res, 0));
 
 	LLVMDisposePassManager(pass);
 	LLVMDisposeBuilder(builder);
